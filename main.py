@@ -1,9 +1,16 @@
 import cv2
 from deepface import DeepFace
 from time import sleep
+import json
 
 # Load face cascade classifier
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+#Get settings
+with open('settings.json', 'r') as file:
+    settings = json.load(file)
+
+print(settings)
 
 # Start capturing video
 cap = cv2.VideoCapture(0)
@@ -34,9 +41,9 @@ while True:
 
         print(emotion)#For development purposes
         
-        if emotion == 'sad':
+        if emotion == 'sad' and settings['yoga_suggestions'] == True:
             print("You should touch grass :)")
-        elif emotion == 'angry' or emotion == 'fear':
+        elif emotion == 'angry' or emotion == 'fear' and settings['outside_suggestions'] == True:
             print("You should try some yoga :)")
 
         # Draw rectangle around face and label with predicted emotion
