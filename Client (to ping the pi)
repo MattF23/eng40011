@@ -1,0 +1,31 @@
+import paho.mqtt.client as mqtt
+import json
+
+# ---------------- MQTT Broker Info ----------------
+BROKER = "rule28.i4t.swin.edu.au"
+PORT = 1883
+TOPIC = "studentID/pi/heartbeat"
+USERNAME = "your_student_id"
+PASSWORD = "your_student_id"
+
+# ---------------- Callbacks ----------------
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to broker")
+        client.subscribe(TOPIC)
+    else:
+        print("Connection failed with code", rc)
+
+def on_message(client, userdata, msg):
+    data = json.loads(msg.payload.decode())
+    print("Heartbeat received:", data)
+
+# ---------------- MQTT Client Setup ----------------
+client = mqtt.Client()
+client.username_pw_set(USERNAME, PASSWORD)
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect(BROKER, PORT, 60)
+client.loop_forever()
+
