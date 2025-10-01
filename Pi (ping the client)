@@ -6,8 +6,8 @@ import paho.mqtt.client as mqtt
 BROKER = "rule28.i4t.swin.edu.au"
 PORT = 1883
 TOPIC = "studentID/pi/heartbeat"  # Topic for ping messages
-USERNAME = "your_student_id"
-PASSWORD = "your_student_id"
+USERNAME = "your_student_id" #Replace with personal student ID
+PASSWORD = "your_student_id" #Replace with personal student ID
 
 # ---------------- MQTT Client Setup ----------------
 client = mqtt.Client()
