@@ -1,0 +1,39 @@
+import time
+import json
+import paho.mqtt.client as mqtt
+
+#MQTT Broker
+BROKER = "rule28.i4t.swin.edu.au"
+PORT = 1883
+TOPIC = "studentID/pi/mood"  
+USERNAME = "104562740"
+PASSWORD = "104562740"
+
+#Client 
+client = mqtt.Client()
+client.username_pw_set(USERNAME, PASSWORD)
+client.connect(BROKER, PORT, 60)
+
+#Mood Data
+def get_mood_data():
+
+    # Example placeholder (replace with your actual data)
+    mood_data = {
+        "expression": "happy",
+        "probabilities": {
+            "happy": 0.85,
+            "sad": 0.05,
+            "angry": 0.02,
+            "neutral": 0.08
+        },
+        "timestamp": time.time()
+    }
+    return mood_data
+
+# ---------------- Main Loop ----------------
+while True:
+    mood_payload = get_mood_data()         # Collect data from your existing system
+    client.publish(TOPIC, json.dumps(mood_payload))
+    print("Published:", mood_payload)
+
+    time.sleep(5)  
