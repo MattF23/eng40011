@@ -5,8 +5,8 @@ import json
 BROKER = "rule28.i4t.swin.edu.au"
 PORT = 1883
 TOPIC = "studentID/pi/heartbeat"
-USERNAME = "your_student_id"
-PASSWORD = "your_student_id"
+USERNAME = "your_student_id" #Replace with personal student ID
+PASSWORD = "your_student_id" #Replace with personal student ID
 
 # ---------------- Callbacks ----------------
 def on_connect(client, userdata, flags, rc):
