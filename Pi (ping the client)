@@ -1,0 +1,27 @@
+import time
+import json
+import paho.mqtt.client as mqtt
+
+# ---------------- MQTT Broker Info ----------------
+BROKER = "rule28.i4t.swin.edu.au"
+PORT = 1883
+TOPIC = "studentID/pi/heartbeat"  # Topic for ping messages
+USERNAME = "your_student_id" #Replace with personal student ID
+PASSWORD = "your_student_id" #Replace with personal student ID
+
+# ---------------- MQTT Client Setup ----------------
+client = mqtt.Client()
+client.username_pw_set(USERNAME, PASSWORD)
+client.connect(BROKER, PORT, 60)
+
+# ---------------- Main Loop ----------------
+while True:
+    heartbeat_msg = {
+        "status": "online",
+        "timestamp": time.time()
+    }
+
+    client.publish(TOPIC, json.dumps(heartbeat_msg))
+    print("Sent heartbeat:", heartbeat_msg)
+
+    time.sleep(5)  # Send heartbeat every 5 seconds
