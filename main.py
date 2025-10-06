@@ -7,10 +7,14 @@ import json
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 #Get settings
-with open('settings.json', 'r') as file:
-    settings = json.load(file)
-
-print(settings)
+try:
+    print("Attempting to read settings file")
+    with open('settings.json', 'r') as file:
+        settings = json.load(file)
+except:
+    #If a settings file has not been created. Use the default settings.
+    print("Settings file does not exist. Falling back to default settings")
+    settings = dict(yoga_suggestion = True, outside_suggestion = True, yoga_message = "Yoga is good for your mental health!", outside_message = "You should touch grass :)")
 
 # Start capturing video
 cap = cv2.VideoCapture(0)
@@ -41,10 +45,10 @@ while True:
 
         print(emotion)#For development purposes
         
-        if emotion == 'sad' and settings['yoga_suggestions'] == True:
-            print("You should touch grass :)")
-        elif emotion == 'angry' or emotion == 'fear' and settings['outside_suggestions'] == True:
-            print("You should try some yoga :)")
+        if emotion == 'sad' and settings['yoga_suggestion'] == True:
+            print(settings["yoga_message"])
+        elif emotion == 'angry' or emotion == 'fear' and settings['outside_suggestion'] == True:
+            print(settings["outside_message"])
 
         # Draw rectangle around face and label with predicted emotion
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
