@@ -74,3 +74,15 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
+
+def on_message(client, userdata, msg):
+    command = msg.payload.decode()
+    print("Received command from app:", command)
+    # Example: update settings live
+    if command == "toggle_yoga":
+        settings["yoga_suggestions"] = not settings["yoga_suggestions"]
+        print("Yoga suggestions set to:", settings["yoga_suggestions"])
+
+client.on_message = on_message
+client.subscribe("raspberrypi/commands")
+
