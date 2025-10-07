@@ -1,0 +1,76 @@
+import cv2
+from deepface import DeepFace
+from time import sleep
+import json
+import paho.mqtt.client as mqtt
+
+# ---------------- MQTT Setup ----------------
+BROKER = "test.mosquitto.org"   #public broker 
+PORT = 1883
+TOPIC = "raspberrypi/emotion"
+
+client = mqtt.Client("PiPublisher")
+client.connect(BROKER, PORT, 60)
+# ------------------------------------------------
+
+# Load face cascade classifier
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+# Load settings
+with open('settings.json', 'r') as file:
+    settings = json.load(file)
+
+print("Settings loaded:", settings)
+
+# Start capturing video
+cap = cv2.VideoCapture(0)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        continue
+
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    rgb_frame = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2RGB)
+
+    # Detect faces
+    faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    for (x, y, w, h) in faces:
+        face_roi = rgb_frame[y:y + h, x:x + w]
+
+        # DeepFace analysis
+        result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False)
+
+        # Get dominant emotion
+        emotion = result[0]['dominant_emotion']
+        print("Detected Emotion:", emotion)
+
+        # Send emotion data over MQTT
+        payload = json.dumps({
+            "emotion": emotion,
+            "settings": settings
+        })
+        client.publish(TOPIC, payload)
+        print("MQTT Published:", payload)
+
+        # Suggestions logic (still local + can also be sent)
+        if emotion == 'sad' and settings['yoga_suggestions'] == True:
+            print("You should touch grass :)")
+        elif (emotion == 'angry' or emotion == 'fear') and settings['outside_suggestions'] == True:
+            print("You should try some yoga :)")
+
+        # Draw rectangle and emotion on video
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        cv2.putText(frame, emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+
+    # Show the video locally (optional for debugging)
+    cv2.imshow('Real-time Emotion Detection', frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+    sleep(10)  # adjust for how often you want to publish
+
+cap.release()
+cv2.destroyAllWindows()
