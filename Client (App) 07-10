@@ -1,0 +1,86 @@
+import android.os.Bundle
+import android.util.Log
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import org.eclipse.paho.android.service.MqttAndroidClient
+import org.eclipse.paho.client.mqttv3.IMqttActionListener
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions
+import org.eclipse.paho.client.mqttv3.MqttMessage
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var mqttClient: MqttAndroidClient
+    private lateinit var textView: TextView
+    private lateinit var commandInput: EditText
+    private lateinit var sendButton: Button
+
+    private val brokerUri = "tcp://test.mosquitto.org:1883"
+    private val subTopic = "raspberrypi/emotion"
+    private val pubTopic = "raspberrypi/commands"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Simple UI layout
+        textView = TextView(this)
+        commandInput = EditText(this)
+        sendButton = Button(this).apply { text = "Send Command" }
+
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(textView)
+            addView(commandInput)
+            addView(sendButton)
+        }
+        setContentView(layout)
+
+        // Setup MQTT
+        mqttClient = MqttAndroidClient(applicationContext, brokerUri, "AndroidClient")
+
+        val options = MqttConnectOptions()
+        options.isCleanSession = true
+
+        mqttClient.connect(options, null, object : IMqttActionListener {
+            override fun onSuccess(asyncActionToken: org.eclipse.paho.client.mqttv3.IMqttToken?) {
+                Log.d("MQTT", "Connected")
+                mqttClient.subscribe(subTopic, 1)
+            }
+
+            override fun onFailure(asyncActionToken: org.eclipse.paho.client.mqttv3.IMqttToken?, exception: Throwable?) {
+                Log.d("MQTT", "Failed to connect: ${exception?.message}")
+            }
+        })
+
+        // Handle messages from Pi
+        mqttClient.setCallback(object : MqttCallback {
+            override fun messageArrived(topic: String?, message: MqttMessage?) {
+                val payload = message.toString()
+                Log.d("MQTT", "Message received: $payload")
+                runOnUiThread {
+                    textView.text = "Pi says: $payload"
+                }
+            }
+
+            override fun connectionLost(cause: Throwable?) {
+                Log.d("MQTT", "Connection lost")
+            }
+
+            override fun deliveryComplete(token: IMqttDeliveryToken?) {}
+        })
+
+        // Send commands back to Pi
+        sendButton.setOnClickListener {
+            val command = commandInput.text.toString()
+            if (command.isNotEmpty()) {
+                val message = MqttMessage(command.toByteArray())
+                mqttClient.publish(pubTopic, message)
+                Log.d("MQTT", "Sent command: $command")
+            }
+        }
+    }
+}
