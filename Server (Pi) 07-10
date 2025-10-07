@@ -5,15 +5,46 @@ import json
 import paho.mqtt.client as mqtt
 
 # ---------------- MQTT Setup ----------------
-BROKER = "test.mosquitto.org"   #public broker 
+BROKER = "test.mosquitto.org"   # You can replace with your own broker/IP
 PORT = 1883
-TOPIC = "raspberrypi/emotion"
+TOPIC_PUBLISH = "raspberrypi/emotion"
+TOPIC_SUBSCRIBE = "raspberrypi/commands"
 
+# Create MQTT client
 client = mqtt.Client("PiPublisher")
+
+# ---------------- Callback: when message received ----------------
+def on_message(client, userdata, msg):
+    command = msg.payload.decode()
+    print("📩 Received command from app:", command)
+
+    # Example: modify local settings dynamically
+    if command == "toggle_yoga":
+        settings["yoga_suggestions"] = not settings["yoga_suggestions"]
+        print("Yoga suggestions toggled:", settings["yoga_suggestions"])
+    elif command == "toggle_outside":
+        settings["outside_suggestions"] = not settings["outside_suggestions"]
+        print("Outside suggestions toggled:", settings["outside_suggestions"])
+    elif command.startswith("set_sleep:"):
+        try:
+            new_sleep = int(command.split(":")[1])
+            settings["sleep_time"] = new_sleep
+            print(f"Updated sleep time to {new_sleep} seconds")
+        except ValueError:
+            print("Invalid sleep command format")
+    else:
+        print("Unknown command received")
+
+# Connect and subscribe
 client.connect(BROKER, PORT, 60)
+client.subscribe(TOPIC_SUBSCRIBE)
+client.on_message = on_message
+
+# Start a background thread so the client can listen continuously
+client.loop_start()
 # ------------------------------------------------
 
-# Load face cascade classifier
+# ---------------- Emotion Detection Setup ----------------
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 # Load settings
@@ -22,7 +53,7 @@ with open('settings.json', 'r') as file:
 
 print("Settings loaded:", settings)
 
-# Start capturing video
+# Start camera
 cap = cv2.VideoCapture(0)
 
 while True:
@@ -33,56 +64,43 @@ while True:
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     rgb_frame = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2RGB)
 
-    # Detect faces
     faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
     for (x, y, w, h) in faces:
         face_roi = rgb_frame[y:y + h, x:x + w]
 
-        # DeepFace analysis
         result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False)
-
-        # Get dominant emotion
         emotion = result[0]['dominant_emotion']
         print("Detected Emotion:", emotion)
 
-        # Send emotion data over MQTT
+        # Publish emotion to Android app
         payload = json.dumps({
             "emotion": emotion,
             "settings": settings
         })
-        client.publish(TOPIC, payload)
-        print("MQTT Published:", payload)
+        client.publish(TOPIC_PUBLISH, payload)
+        print("📤 Sent:", payload)
 
-        # Suggestions logic (still local + can also be sent)
-        if emotion == 'sad' and settings['yoga_suggestions'] == True:
+        # Local logic
+        if emotion == 'sad' and settings.get('yoga_suggestions', False):
             print("You should touch grass :)")
-        elif (emotion == 'angry' or emotion == 'fear') and settings['outside_suggestions'] == True:
+        elif (emotion in ['angry', 'fear']) and settings.get('outside_suggestions', False):
             print("You should try some yoga :)")
 
-        # Draw rectangle and emotion on video
+        # Draw face box and emotion label
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
         cv2.putText(frame, emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
 
-    # Show the video locally (optional for debugging)
     cv2.imshow('Real-time Emotion Detection', frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-    sleep(10)  # adjust for how often you want to publish
+    # Use configurable sleep time (default 10s)
+    sleep(settings.get("sleep_time", 10))
 
+# Cleanup
 cap.release()
 cv2.destroyAllWindows()
-
-def on_message(client, userdata, msg):
-    command = msg.payload.decode()
-    print("Received command from app:", command)
-    # Example: update settings live
-    if command == "toggle_yoga":
-        settings["yoga_suggestions"] = not settings["yoga_suggestions"]
-        print("Yoga suggestions set to:", settings["yoga_suggestions"])
-
-client.on_message = on_message
-client.subscribe("raspberrypi/commands")
-
+client.loop_stop()
+client.disconnect()
