@@ -1,0 +1,25 @@
+CoroutineScope(Dispatchers.IO).launch {
+    connectToPi("192.168.1.25", "pi", "raspberry")
+}
+
+suspend fun connectToPi(host: String, user: String, password: String) {
+    val jsch = JSch()
+    val session = jsch.getSession(user, host, 22)
+    session.setPassword(password)
+
+    val config = java.util.Properties()
+    config["StrictHostKeyChecking"] = "no"
+    session.setConfig(config)
+
+    session.connect(5000)
+    val channel = session.openChannel("exec") as com.jcraft.jsch.ChannelExec
+    channel.setCommand("vcgencmd measure_temp")
+    val input = channel.inputStream
+    channel.connect()
+
+    val output = input.bufferedReader().use { it.readText() }
+    Log.d("SSH", "Pi temperature: $output")
+
+    channel.disconnect()
+    session.disconnect()
+}
