@@ -61,7 +61,7 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-    sleep(10)
+    sleep(1)
 
 # Release the capture and close all windows
 cap.release()
