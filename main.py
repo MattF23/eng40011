@@ -1,4 +1,5 @@
 import cv2
+from picamera2 import Picamera2
 from deepface import DeepFace
 from time import sleep
 import json
@@ -17,11 +18,12 @@ except:
     settings = dict(yoga_suggestion = True, outside_suggestion = True, yoga_message = "Yoga is good for your mental health!", outside_message = "You should touch grass :)")
 
 # Start capturing video
-cap = cv2.VideoCapture(0)
+cap = Picamera2()
+cap.start()
 
 while True:
     # Capture frame-by-frame
-    ret, frame = cap.read()
+    frame = cap.capture_array()
 
     # Convert frame to grayscale
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
