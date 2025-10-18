@@ -3,6 +3,7 @@ from picamera2 import Picamera2
 from deepface import DeepFace
 from time import sleep
 import json
+from playsound import playsound
 
 # Load face cascade classifier
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
@@ -48,9 +49,9 @@ while True:
         print(emotion)#For development purposes
         
         if emotion == 'sad' and settings['sadness_detection'] == True:
-            print("Play music!")
+            playsound(settings['sadness_music'] + ".mp3")
         elif emotion == 'angry' or emotion == 'fear' and settings['anger_detection'] == True:
-            print("Play music!")
+            playsound(settings["angry_music"] + ".mp3")
 
         # Draw rectangle around face and label with predicted emotion
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
