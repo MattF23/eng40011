@@ -14,7 +14,7 @@ try:
 except:
     #If a settings file has not been created. Use the default settings.
     print("Settings file does not exist. Falling back to default settings")
-    settings = dict(yoga_suggestion = True, outside_suggestion = True, yoga_message = "Yoga is good for your mental health!", outside_message = "You should touch grass :)")
+    settings = dict(sadness_detection = True, anger_detection = True, sadness_music = "Yoga is good for your mental health!", angry_music = "You should touch grass :)")
 
 # Start capturing video
 cap = cv2.VideoCapture(0)
@@ -45,10 +45,10 @@ while True:
 
         print(emotion)#For development purposes
         
-        if emotion == 'sad' and settings['yoga_suggestion'] == True:
-            print(settings["yoga_message"])
-        elif emotion == 'angry' or emotion == 'fear' and settings['outside_suggestion'] == True:
-            print(settings["outside_message"])
+        if emotion == 'sad' and settings['sadness_detection'] == True:
+            print("play music")
+        elif emotion == 'angry' or emotion == 'fear' and settings['anger_detection'] == True:
+            print("play music!")
 
         # Draw rectangle around face and label with predicted emotion
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
