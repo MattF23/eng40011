@@ -15,7 +15,7 @@ try:
 except:
     #If a settings file has not been created. Use the default settings.
     print("Settings file does not exist. Falling back to default settings")
-    settings = dict(yoga_suggestion = True, outside_suggestion = True, yoga_message = "Yoga is good for your mental health!", outside_message = "You should touch grass :)")
+    settings = dict(sadness_detection = True, anger_detection = True, sadness_music = "Yoga is good for your mental health!", angry_music = "You should touch grass :)")
 
 # Start capturing video
 cap = Picamera2()
