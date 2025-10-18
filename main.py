@@ -3,6 +3,7 @@ from picamera2 import Picamera2
 from deepface import DeepFace
 from time import sleep
 import json
+from os import system
 from playsound import playsound
 
 # Load face cascade classifier
@@ -21,6 +22,9 @@ except:
 # Start capturing video
 cap = Picamera2()
 cap.start()
+
+#Set volume
+system('amixer sset Master ' + settings['Volume'])
 
 while True:
     # Capture frame-by-frame
