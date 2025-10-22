@@ -56,6 +56,8 @@ while True:
             playsound(settings['sadness_music'] + ".mp3")
         elif emotion == 'angry' or emotion == 'fear' and settings['anger_detection'] == True:
             playsound(settings["angry_music"] + ".mp3")
+        elif emotion == 'happy' and settings['happiness_detection'] == True:
+            playsound(settings["happy_music"] + ".mp3")
 
         # Draw rectangle around face and label with predicted emotion
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
