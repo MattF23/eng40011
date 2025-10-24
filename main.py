@@ -60,6 +60,8 @@ while True:
                 playsound(settings["happy_music"] + ".mp3")
         except:
             print("Can't connect to your speaker, check your cabeling!")
+        finally:
+            continue
 
         # Draw rectangle around face and label with predicted emotion
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
