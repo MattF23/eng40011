@@ -51,13 +51,15 @@ while True:
         emotion = result[0]['dominant_emotion']
 
         print(emotion)#For development purposes
-        
-        if emotion == 'sad' and settings['sadness_detection'] == True:
-            playsound(settings['sadness_music'] + ".mp3")
-        elif emotion == 'angry' or emotion == 'fear' and settings['anger_detection'] == True:
-            playsound(settings["angry_music"] + ".mp3")
-        elif emotion == 'happy' and settings['happiness_detection'] == True:
-            playsound(settings["happy_music"] + ".mp3")
+        try:
+            if emotion == 'sad' and settings['sadness_detection'] == True:
+                playsound(settings['sadness_music'] + ".mp3")
+            elif emotion == 'angry' or emotion == 'fear' and settings['anger_detection'] == True:
+                playsound(settings["angry_music"] + ".mp3")
+            elif emotion == 'happy' and settings['happiness_detection'] == True:
+                playsound(settings["happy_music"] + ".mp3")
+        except:
+            print("Can't connect to your speaker, check your cabeling!")
 
         # Draw rectangle around face and label with predicted emotion
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
