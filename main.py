@@ -53,11 +53,14 @@ while True:
         print(emotion)#For development purposes
         try:
             if emotion == 'sad' and settings['sadness_detection'] == True:
-                playsound(settings['sadness_music'] + ".mp3")
+                #playsound(settings['sadness_music'] + ".mp3")
+                print("Sad detected")
             elif emotion == 'angry' or emotion == 'fear' and settings['anger_detection'] == True:
-                playsound(settings["angry_music"] + ".mp3")
+                #playsound(settings["angry_music"] + ".mp3")
+                print("Anger detected")
             elif emotion == 'happy' and settings['happiness_detection'] == True:
-                playsound(settings["happy_music"] + ".mp3")
+                #playsound(settings["happy_music"] + ".mp3")
+                print("Happiness detected")
         except:
             print("Can't connect to your speaker, check your cabeling!")
         finally:
