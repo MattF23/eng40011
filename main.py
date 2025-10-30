@@ -54,13 +54,13 @@ while True:
         try:
             if emotion == 'sad' and settings['sadness_detection'] == True:
                 #playsound(settings['sadness_music'] + ".mp3")
-                print("Sad detected")
+                sleep(5)
             elif emotion == 'angry' or emotion == 'fear' and settings['anger_detection'] == True:
                 #playsound(settings["angry_music"] + ".mp3")
-                print("Anger detected")
+                sleep(5)
             elif emotion == 'happy' and settings['happiness_detection'] == True:
                 #playsound(settings["happy_music"] + ".mp3")
-                print("Happiness detected")
+                sleep(5)
         except:
             print("Can't connect to your speaker, check your cabeling!")
         finally:
@@ -71,7 +71,7 @@ while True:
         cv2.putText(frame, emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
 
     # Display the resulting frame
-    cv2.imshow('Real-time Emotion Detection', frame)#For development purposes
+    #cv2.imshow('Real-time Emotion Detection', frame)#For development purposes
 
     # Press 'q' to exit
     if cv2.waitKey(1) & 0xFF == ord('q'):
